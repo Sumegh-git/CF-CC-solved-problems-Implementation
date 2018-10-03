@@ -6,43 +6,67 @@
     #define mp make_pair
     #define pb push_back
     #define pll pair<long long,long long>
-    #define pii pair<ll,ll>
+    #define pii pair<int,int>
     #define X first
     #define Y second
     #define fast ios_base::sync_with_stdio(false),cin.tie(NULL),cout.tie(NULL)
     #define endl '\n'
-     const ll mod=1000000007;
-
-int main()
-{    fast;
-	ll t,k,a,b;
-	cin>>t>>k;
-	ll dp[100001][2],sum[100001];  //0-red 1-white
-	for(ll i=0;i<=100000;i++)
-		{dp[i][0]=0;dp[i][1]=0;sum[i]=0;}
-	dp[0][0]=1;dp[0][1]=1;
-	if(k==1){dp[1][0]=1;dp[1][1]=1;}
-	else dp[1][0]=1;
-	sum[1]=dp[1][0]+dp[1][1];
-	//cout<<sum[1]<<endl;
-	for(ll i=2;i<=100000;i++)
-	{
-      dp[i][0]=(dp[i-1][0]+dp[i-1][1])%mod;
-     if(i-k>0)
-      dp[i][1]=(dp[i-k][1]+dp[i-k][0])%mod;
-     else if(i-k==0)
-     	dp[i][1]=(dp[i][1]+dp[i-k][1])%mod;
-     
-    sum[i]=(sum[i-1]+dp[i][0]+dp[i][1])%mod;
-   // cout<<sum[i]<<endl;
-   // if(i>=4)break;
+  bool f=false,fup=false; 
+  const ll N=(1<<17)+10;
+        ll arr[N];
+        ll segtree[6*N];ll n;
+void build(ll i,ll j,ll index,ll level)
+{
+    if(i==j){
+        segtree[index]=arr[i];
+        return;
     }
-
-	while(t--)
-	{
-		cin>>a>>b;
-		cout<<((sum[b]%mod-sum[a-1]%mod)+mod)%mod<<endl;
-	//cout<<dp[3][0]+dp[3][1]<<","<<dp[4][0]+dp[4][1]<<endl;
-	}
-	return 0;
+    ll mid=(i+j)>>1;
+    build(i,mid,2*index+1,level-1);
+    build(mid+1,j,2*index+2,level-1);
+    if(level%2==0)
+   segtree[index]=segtree[2*index+1] ^ segtree[2*index+2];
+  else
+  segtree[index]=segtree[2*index+1] | segtree[2*index+2];
+   return;
 }
+void update(ll n,ll i,ll j,ll index,ll value,ll level)
+{ 
+  if(i == j)
+  {
+    segtree[n]=value;
+    return;
+  }
+  ll mid=(i+j)>>1;
+  if(mid>=index)
+
+    update(2*n+1,i,mid,index,value,level-1);
+ else
+   update(2*n+2,mid+1,j,index,value,level-1);
+   if(level%2==0)
+  segtree[n]=segtree[2*n + 1] ^ segtree[2*n+2];
+else
+segtree[n]=segtree[2*n+1] | segtree[2*n+2];
+  return;
+}
+    int main()
+    {
+        fast;
+        ll m;
+        cin>>n>>m;
+        
+        for(ll i=0;i<(1<<n);i++)
+            cin>>arr[i];
+        build(0,(1<<n)-1,0,n);
+      //  for(int i=0;i<16;++i)
+        //    cout<<segtree[i]<<endl;
+        while(m--)
+        {
+            ll p,b;
+            cin>>p>>b;
+            update(0,0,(1<<n)-1,p-1,b,n);
+            //fup=false;
+            cout<<segtree[0]<<endl;
+        }
+        return 0;
+    }
